@@ -16,6 +16,8 @@
 #define MAGENTA 0xF81F
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
+#define ORANGE  0xFC00
+#define PURPLE  0x69DD
 
 #define YP A3
 #define XM A2
@@ -59,6 +61,13 @@ void setup() {
   answer4 = 0;
   gameStart();
 }
+
+/*extern const uint8_t abundance[];
+  tft.setAddrWindow(tft.width() - 40 - 40, 20 + 0, tft.width() - 1 - 40, 20 + 39);
+  tft.pushColors(abundance, 1600, 1); */
+
+/* Code for displaying the image of abundance in images.c */
+/* http://www.rinkydinkelectronics.com/_t_doimageconverter565.php */
 
 void loop() {
   checkAnswers();
@@ -126,7 +135,7 @@ void gameStart(void)
   tft.setCursor(25, 50);
   tft.println("THE");
 
-  tft.setTextColor(MAGENTA);
+  tft.setTextColor(PURPLE);
   tft.setTextSize(3);
   tft.setCursor(30, 59);
   tft.println("IMPOSSIBLE");
