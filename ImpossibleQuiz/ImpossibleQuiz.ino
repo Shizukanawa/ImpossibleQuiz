@@ -1,5 +1,4 @@
 #include <Adafruit_GFX.h>
-#include <Adafruit_TFTLCD.h>
 #include <TouchScreen.h>
 #include <MCUFRIEND_kbv.h>
 
@@ -52,38 +51,72 @@ void setup() {
   Serial.begin(9600);
   tft.reset();
   tft.begin(tft.readID());
-  tft.setTextColor(WHITE);
-  tft.setTextSize(3);
   tft.fillScreen(WHITE);
-  questionNumber = 1;
+  questionNumber = 0;
   lives = 3;
   answer1 = 0;
   answer2 = 0;
   answer3 = 0;
   answer4 = 0;
+  gameStart();
 }
 
 void loop() {
-  if (lives == 0)
+  if (answer1)
   {
-    
-  }
-  
-  if (answer1 == 1)
-  {
-    --lives;
-    if (lives == 0)
-      gameOver();
-    else
+    if (questionNumber == 1)
     {
-      questionOne();
-      delay(250);
-      answer1 = 0;
+        --lives;
+        if (lives == 0)
+          gameOver();
+        else
+        {
+          questionOne();
+          delay(250);
+          answer1 = 0; 
+        }
     }
   }
-
-  if(questionNumber == 1 && previousQuestion == 0)
-    questionOne();
+  else if (answer2)
+  {
+    if (questionNumber == 1)
+    {
+      --lives;
+      if (lives == 0)
+        gameOver();
+      else
+      {
+        questionOne();
+        delay(250);
+        answer2 = 0;
+      }
+    }
+  }
+  else if (answer3)
+  {
+    if (questionNumber == 1)
+    {
+      --lives;
+      if (lives == 0)
+        gameOver();
+      else
+      {
+        questionOne();
+        delay(250);
+        answer3 = 0;
+      }
+    }
+  }
+  else if (answer4)
+  {
+    if (questionNumber == 1)
+    {
+      tft.fillScreen(BLACK);
+      delay(250);
+      answer4 = 0;
+      questionNumber = 2;
+    }
+  }
 
   TSPoint p = ts.getPoint();
   pinMode(YP, OUTPUT);
@@ -94,15 +127,35 @@ void loop() {
     Serial.print(p.x);
     Serial.print(" ");
     Serial.println(p.y);
-    if (questionNumber == 1)
+    switch(questionNumber)
     {
-      if (p.x >= 10 && p.x < 110) //First block
-      {
-        if(p.y >= 180 && p.y < 240)
+      case 0:
+        if (p.x >= 26 && p.x < 212)
         {
-          answer1 = 1;
+          if(p.y >= 200 && p.y < 260)
+          {
+            questionOne();
+            delay(250);
+            questionNumber = 1;
+          }
         }
-      }
+        break;
+      default:
+        if (p.x >= 10 && p.x < 110) //First block
+        {
+          if (p.y >= 180 && p.y < 240)
+            answer1 = 1;
+          else if (p.y >= 250 && p.y < 300) //Third Block
+            answer3 = 1;
+        }
+        else if (p.x >= 135 && p.x < 230) //Second block
+        {
+          if (p.y >= 180 && p.y < 240)
+            answer2 = 1;
+          else if (p.y >= 250 && p.y < 300) //Fourth Block
+            answer4 = 1;
+        }
+        break;
     }
   }
 }
@@ -116,7 +169,35 @@ void gameOver(void)
   answer4 = 0;
   lives = 3;
   previousQuestion = 0;
-  questionOne();
+  questionNumber = 0;
+  gameStart();
+}
+
+void gameStart(void)
+{
+  tft.fillScreen(WHITE);
+  
+  tft.setTextColor(RED);
+  tft.setTextSize(1);
+  tft.setCursor(25, 50);
+  tft.println("THE");
+
+  tft.setTextColor(MAGENTA);
+  tft.setTextSize(3);
+  tft.setCursor(30, 59);
+  tft.println("IMPOSSIBLE");
+
+  tft.setTextColor(GREEN);
+  tft.setTextSize(2);
+  tft.setCursor(161, 82);
+  tft.println("QUIZ");
+  
+  tft.fillRect(25, 200, 190, 50, BLUE);
+  tft.fillRect(30, 205, 180, 40, WHITE);
+  tft.setCursor(63, 210);
+  tft.setTextColor(BLACK);
+  tft.setTextSize(4);
+  tft.println("START");
 }
 
 void questionOne(void)
