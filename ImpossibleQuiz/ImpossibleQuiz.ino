@@ -37,7 +37,6 @@ MCUFRIEND_kbv tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 #define MAXPRESSURE 1000
 
 int questionNumber;
-int previousQuestion = 0;
 int lives;
 
 int answer1;
@@ -62,62 +61,8 @@ void setup() {
 }
 
 void loop() {
-  if (answer1)
-  {
-    if (questionNumber == 1)
-    {
-        --lives;
-        if (lives == 0)
-          gameOver();
-        else
-        {
-          questionOne();
-          delay(250);
-          answer1 = 0; 
-        }
-    }
-  }
-  else if (answer2)
-  {
-    if (questionNumber == 1)
-    {
-      --lives;
-      if (lives == 0)
-        gameOver();
-      else
-      {
-        questionOne();
-        delay(250);
-        answer2 = 0;
-      }
-    }
-  }
-  else if (answer3)
-  {
-    if (questionNumber == 1)
-    {
-      --lives;
-      if (lives == 0)
-        gameOver();
-      else
-      {
-        questionOne();
-        delay(250);
-        answer3 = 0;
-      }
-    }
-  }
-  else if (answer4)
-  {
-    if (questionNumber == 1)
-    {
-      tft.fillScreen(BLACK);
-      delay(250);
-      answer4 = 0;
-      questionNumber = 2;
-    }
-  }
-
+  checkAnswers();
+  
   TSPoint p = ts.getPoint();
   pinMode(YP, OUTPUT);
   pinMode(XM, OUTPUT);
@@ -168,7 +113,6 @@ void gameOver(void)
   answer3 = 0;
   answer4 = 0;
   lives = 3;
-  previousQuestion = 0;
   questionNumber = 0;
   gameStart();
 }
@@ -198,6 +142,157 @@ void gameStart(void)
   tft.setTextColor(BLACK);
   tft.setTextSize(4);
   tft.println("START");
+}
+
+void checkAnswers(void)
+{
+  /* ANSWER 1 */
+  if (answer1)
+  {
+    switch (questionNumber)
+    {
+      case 1:
+        --lives;
+        if (lives == 0)
+          gameOver();
+        else
+        {
+          questionOne();
+          delay(250);
+          answer1 = 0; 
+        }
+        break;
+      case 2:
+        --lives;
+        if (lives == 0)
+          gameOver();
+        else
+        {
+          questionTwo();
+          delay(250);
+          answer1 = 0;    
+        }
+        break;
+      case 3:
+        tft.fillScreen(BLACK);
+        delay(250);
+        answer1 = 0;
+        ++questionNumber;
+        break;
+    }
+  }
+  
+  /* ANSWER TWO */
+  else if (answer2)
+  {
+    switch (questionNumber)
+    {
+      case 1:
+        --lives;
+        if (lives == 0)
+          gameOver();
+        else
+        {
+          questionOne();
+          delay(250);
+          answer2 = 0;
+        }
+        break;
+      case 2:
+        --lives;
+        if (lives == 0)
+          gameOver();
+        else
+        {
+          questionTwo();
+          delay(250);
+          answer2 = 0;
+        }
+        break;
+      case 3:
+        --lives;
+        if (lives == 0)
+          gameOver();
+        else
+        {
+          questionThree();
+          delay(250);
+          answer2 = 0;
+        }
+        break;
+    }
+  }
+
+  /* ANSWER 3 */
+  else if (answer3)
+  {
+    switch (questionNumber)
+    {
+      case 1:
+        --lives;
+        if (lives == 0)
+          gameOver();
+        else
+        {
+          questionOne();
+          delay(250);
+          answer3 = 0;
+        }
+        break;
+      case 2:
+        questionThree();
+        delay(250);
+        answer3 = 0;
+        ++questionNumber;
+        break;
+      case 3:
+        --lives;
+        if (lives == 0)
+          gameOver();
+        else
+        {
+          questionThree();
+          delay(250);
+          answer3 = 0;
+        }
+        break;
+    }
+  }
+
+  /* ANSWER 4 */
+  else if (answer4)
+  {
+    switch (questionNumber)
+    {
+      case 1:
+        questionTwo();
+        delay(250);
+        answer4 = 0;
+        ++questionNumber;
+        break;
+      case 2:
+        --lives;
+        if (lives == 0)
+          gameOver();
+        else
+        {
+          questionTwo();
+          delay(250);
+          answer4 = 0;
+        }
+        break;
+      case 3:
+        --lives;
+        if (lives == 0)
+          gameOver();
+        else
+        {
+          questionThree();
+          delay(250);
+          answer4 = 0;
+        }
+    }
+  }
 }
 
 void questionOne(void)
@@ -257,6 +352,134 @@ void questionOne(void)
   tft.fillRect(140, 250, 80, 30, WHITE);
   tft.setCursor(157, 258);
   tft.println("FOUR");
+}
+
+void questionTwo(void)
+{
+  //Reset screen
+  tft.fillScreen(WHITE);
   
-  previousQuestion = 1;
+  //Question number
+  tft.fillRect(0, 0, 50, 50, RED);
+  tft.fillRect(5, 5, 40, 40, WHITE);
+  tft.setCursor(17, 17);
+  tft.setTextColor(BLACK);
+  tft.setTextSize(2);
+  tft.println("2.");
+
+  //Lives
+  tft.setCursor(10, 300);
+  tft.println("LIVES:"); tft.setCursor(90, 300);
+  if (lives == 3)
+    tft.setTextColor(GREEN);
+  else if (lives == 2)
+    tft.setTextColor(YELLOW);
+  else if (lives == 1)
+    tft.setTextColor(RED);
+  tft.println(lives);
+
+  //Question
+  tft.setCursor(60, 17);
+  tft.setTextColor(BLUE);
+  tft.println("CAN A");
+  tft.setCursor(80, 35);
+  tft.println("MATCH BOX?");
+
+  //Answer blocks
+  tft.setTextColor(BLACK);
+  tft.setTextSize(2.5);
+  //1
+  tft.fillRect(10, 180, 100, 50, BLUE);
+  tft.fillRect(20, 190, 80, 30, WHITE);
+  tft.setCursor(43, 198);
+  tft.println("YES");
+  
+  //2
+  tft.fillRect(130, 180, 100, 50, BLUE);
+  tft.fillRect(140, 190, 80, 30, WHITE);
+  tft.setCursor(170, 198);
+  tft.println("NO");
+
+  //3
+  tft.setTextSize(1);
+  tft.fillRect(10, 240, 100, 50, BLUE);
+  tft.fillRect(20, 250, 80, 30, WHITE);
+  tft.setCursor(33, 258);
+  tft.println("NO, BUT A");
+  tft.setCursor(38, 268);
+  tft.println("TIN CAN");
+
+  //4
+  tft.fillRect(130, 240, 100, 50, BLUE);
+  tft.fillRect(140, 250, 80, 30, WHITE);
+  tft.setCursor(142, 258);
+  tft.println("YES, ONE BEAT");
+  tft.setCursor(150, 268);
+  tft.println("MIKE TYSON");
+}
+
+void questionThree(void)
+{
+  //Reset screen
+  tft.fillScreen(WHITE);
+  
+  //Question number
+  tft.fillRect(0, 0, 50, 50, RED);
+  tft.fillRect(5, 5, 40, 40, WHITE);
+  tft.setCursor(17, 17);
+  tft.setTextColor(BLACK);
+  tft.setTextSize(2);
+  tft.println("3.");
+
+  //Lives
+  tft.setCursor(10, 300);
+  tft.println("LIVES:"); tft.setCursor(90, 300);
+  if (lives == 3)
+    tft.setTextColor(GREEN);
+  else if (lives == 2)
+    tft.setTextColor(YELLOW);
+  else if (lives == 1)
+    tft.setTextColor(RED);
+  tft.println(lives);
+
+  //Question
+  tft.setCursor(80, 17);
+  tft.setTextColor(BLUE);
+  tft.println(".SDRAWKCAB");
+  tft.setCursor(60, 35);
+  tft.println("NOITSEUQ SIHT");
+  tft.setCursor(100, 53);
+  tft.println("REWSNA");
+
+  //Answer blocks
+  tft.setTextColor(BLACK);
+  tft.setTextSize(2.5);
+  //1
+  tft.fillRect(10, 180, 100, 50, BLUE);
+  tft.fillRect(20, 190, 80, 30, WHITE);
+  tft.setCursor(43, 198);
+  tft.println("K.O");
+  
+  //2
+  tft.fillRect(130, 180, 100, 50, BLUE);
+  tft.fillRect(140, 190, 80, 30, WHITE);
+  tft.setCursor(152, 198);
+  tft.println("WHAT?");
+
+  //3
+  tft.setTextSize(1);
+  tft.fillRect(10, 240, 100, 50, BLUE);
+  tft.fillRect(20, 250, 80, 30, WHITE);
+  tft.setCursor(38, 258);
+  tft.println("I DON'T");
+  tft.setCursor(30, 268);
+  tft.println("UNDERSTAND");
+
+  //4
+  tft.fillRect(130, 240, 100, 50, BLUE);
+  tft.fillRect(140, 250, 80, 30, WHITE);
+  tft.setCursor(162, 258);
+  tft.println("TENNIS");
+  tft.setCursor(165, 268);
+  tft.println("ELBOW");
 }
