@@ -18,6 +18,8 @@
 #define WHITE   0xFFFF
 #define ORANGE  0xFC00
 #define PURPLE  0x69DD
+#define LIGHTBLUE 0xAD7F
+#define DARKGREEN 0x1380
 
 #define YP A3
 #define XM A2
@@ -40,6 +42,7 @@ MCUFRIEND_kbv tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
 int questionNumber;
 int lives;
+int fiveTwoCheck = 0;
 
 int answer1;
 int answer2;
@@ -65,6 +68,11 @@ void setup() {
 /*extern const uint8_t abundance[];
   tft.setAddrWindow(tft.width() - 40 - 40, 20 + 0, tft.width() - 1 - 40, 20 + 39);
   tft.pushColors(abundance, 1600, 1); */
+
+/*extern const uint8_t abundance[];
+  tft.setAddrWindow(tft.width() - 140, 20 + 100, tft.width() - 1  - 100, 20 + 139);
+  tft.pushColors(abundance, 1600, 1);*/
+/* -1 in the 3rd parameter is important */  
 
 /* Code for displaying the image of abundance in images.c */
 /* http://www.rinkydinkelectronics.com/_t_doimageconverter565.php */
@@ -162,12 +170,46 @@ void checkPresses(void)
       case 4:
         if (p.x >= 80 && p.x < 200 && p.y >= 35 && p.y < 45)
         {
-          tft.fillScreen(BLACK);
+          questionFive();
           delay(250);
           ++questionNumber;
         }
         else
           defaultAnswers(p);
+        break;
+      case 5:
+        if (p.x >= 200 && p.x < 240 && p.y >= 200 && p.y < 260)
+        {
+          if (!fiveTwoCheck)
+            questionFive2();
+        }
+        else if (p.x >= 0 && p.x < 240 && p.y >= 310 && p.y < 350)
+        {
+          questionNumber = questionNumber;
+          /* CODE FOR SKIP & SAFEZONE */
+        }
+        else if (p.x >= 0 && p.x < 50 && p.y >= 0 && p.y < 50)
+          questionNumber = questionNumber;
+          /* SAFEZONE FOR QUESTION NUMBER */
+        else if (p.x >= 0 && p.x < 45 && p.y >= 150 && p.y < 220)
+        {
+          ++questionNumber;
+          tft.fillScreen(BLACK);
+          extern const uint8_t abundance[];
+          tft.setAddrWindow(tft.width() - 140, 20 + 100, tft.width() - 1  - 100, 20 + 139);
+          tft.pushColors(abundance, 1600, 1);
+        }
+        else
+        {
+          if(fiveTwoCheck)
+          {
+            --lives;
+            questionFive2();
+            delay(250);
+            if(lives == 0)
+              gameOver();
+          }
+        }
         break;
       default:
         defaultAnswers(p);
@@ -390,6 +432,26 @@ void defaultAnswers(TSPoint p)
   }
 }
 
+void printLives(void)
+{
+  //Lives
+  tft.setCursor(10, 300);
+  tft.println("LIVES:"); tft.setCursor(90, 300);
+  switch (lives)
+  {
+    case 1:
+      tft.setTextColor(RED);
+      break;
+    case 2:
+      tft.setTextColor(YELLOW);
+      break;
+    case 3:
+      tft.setTextColor(GREEN);
+      break;
+  }
+  tft.println(lives);
+}
+
 void questionOne(void)
 {
   //Reset screen
@@ -403,16 +465,7 @@ void questionOne(void)
   tft.setTextSize(2);
   tft.println("1.");
 
-  //Lives
-  tft.setCursor(10, 300);
-  tft.println("LIVES:"); tft.setCursor(90, 300);
-  if (lives == 3)
-    tft.setTextColor(GREEN);
-  else if (lives == 2)
-    tft.setTextColor(YELLOW);
-  else if (lives == 1)
-    tft.setTextColor(RED);
-  tft.println(lives);
+  printLives();
 
   //Question
   tft.setCursor(60, 17);
@@ -462,16 +515,7 @@ void questionTwo(void)
   tft.setTextSize(2);
   tft.println("2.");
 
-  //Lives
-  tft.setCursor(10, 300);
-  tft.println("LIVES:"); tft.setCursor(90, 300);
-  if (lives == 3)
-    tft.setTextColor(GREEN);
-  else if (lives == 2)
-    tft.setTextColor(YELLOW);
-  else if (lives == 1)
-    tft.setTextColor(RED);
-  tft.println(lives);
+  printLives();
 
   //Question
   tft.setCursor(60, 17);
@@ -526,16 +570,7 @@ void questionThree(void)
   tft.setTextSize(2);
   tft.println("3.");
 
-  //Lives
-  tft.setCursor(10, 300);
-  tft.println("LIVES:"); tft.setCursor(90, 300);
-  if (lives == 3)
-    tft.setTextColor(GREEN);
-  else if (lives == 2)
-    tft.setTextColor(YELLOW);
-  else if (lives == 1)
-    tft.setTextColor(RED);
-  tft.println(lives);
+  printLives();
 
   //Question
   tft.setCursor(80, 17);
@@ -592,16 +627,7 @@ void questionFour(void)
   tft.setTextSize(2);
   tft.println("4.");
 
-  //Lives
-  tft.setCursor(10, 300);
-  tft.println("LIVES:"); tft.setCursor(90, 300);
-  if (lives == 3)
-    tft.setTextColor(GREEN);
-  else if (lives == 2)
-    tft.setTextColor(YELLOW);
-  else if (lives == 1)
-    tft.setTextColor(RED);
-  tft.println(lives);
+  printLives();
 
   //Question
   tft.setCursor(110, 17);
@@ -636,4 +662,75 @@ void questionFour(void)
   tft.fillRect(140, 250, 80, 30, WHITE);
   tft.setCursor(145, 262);
   tft.println("OUT OF ORDER");
+}
+
+void questionFive(void)
+{
+  //Reset screen
+  tft.fillScreen(WHITE);
+  
+  //Question number
+  tft.fillRect(0, 0, 50, 50, RED);
+  tft.fillRect(5, 5, 40, 40, WHITE);
+  tft.setCursor(17, 17);
+  tft.setTextColor(BLACK);
+  tft.setTextSize(2);
+  tft.println("5.");
+
+  printLives();
+  
+  tft.setTextSize(3);
+  tft.setCursor(60, 17);
+  tft.setTextColor(BLUE);
+  tft.println("PUT THE");
+  tft.setCursor(60, 45);
+  tft.println("THUMB...");
+
+  tft.setCursor(20, 150);
+  tft.println("...ON HERE");
+
+  tft.fillCircle(225, 220, 30, BLUE);
+  tft.fillCircle(225, 220, 25, WHITE);
+  tft.fillCircle(225, 220, 10, RED);
+
+  for (int i = 0; i < 5; ++i)
+    tft.drawLine(152 + i, 175, 185 + i, 205, BLUE); 
+  for (int i = 0; i < 4; ++i)
+    tft.drawFastVLine(186 + i, 185, 20, BLUE);
+  for (int i = 0; i < 4; ++i)
+    tft.drawFastHLine(168, 202 + i, 22, BLUE);
+}
+
+void questionFive2(void)
+{
+  fiveTwoCheck = 1;
+  //Reset screen
+  tft.fillScreen(BLUE);
+  
+  //Question number
+  tft.fillRect(0, 0, 50, 50, RED);
+  tft.fillRect(5, 5, 40, 40, LIGHTBLUE);
+  tft.setCursor(17, 17);
+  tft.setTextColor(BLACK);
+  tft.setTextSize(2);
+  tft.println("5.");
+
+  tft.fillRect(0, 295, 249, 35, LIGHTBLUE);
+  printLives();
+
+  tft.fillCircle(225, 220, 30, GREEN);
+  tft.fillCircle(225, 220, 10, RED);
+
+  tft.fillCircle(10, 180, 30, GREEN);
+  tft.fillCircle(10, 180, 10, RED);
+
+  tft.setTextColor(LIGHTBLUE);
+  tft.setCursor(100, 30);
+  tft.println("NOW,");
+  tft.setCursor(80, 60);
+  tft.println("DON'T");
+  tft.setCursor(100, 90);
+  tft.println("TOUCH");
+  tft.setCursor(120, 120);
+  tft.println("BLUE");
 }
